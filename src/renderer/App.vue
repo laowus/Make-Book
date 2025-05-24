@@ -6,10 +6,13 @@ import EventBus from "./common/EventBus";
 import Header from "./components/Header.vue";
 import TxtEditor from "./components/TxtEditor.vue";
 import { useBookStore } from "./store/bookStore";
+const { ipcRenderer } = window.require("electron");
+const { addTocByHref } = useBookStore();
 const { curChapter, metaData, toc } = storeToRefs(useBookStore());
 let tocView;
 //重新布局目录
-const updateTocView = (href) => {
+const updateTocView = (curhref) => {
+  console.log("curhref", curhref);
   tocView = createTOCView(
     toc.value,
     (href) => {
@@ -17,18 +20,41 @@ const updateTocView = (href) => {
     },
     (href, event) => {
       updateCurChapter(href);
-      showContextMenu(event, href);
+      //showContextMenu(event, href);
     }
   );
   const tocViewElement = window.$("#toc-view");
   tocViewElement.innerHTML = "";
   tocViewElement.append(tocView.element);
-  tocView.setCurrentHref(href);
+  tocView.setCurrentHref(curhref);
+  updateCurChapter(curhref);
 };
 
-EventBus.on("addChapter", (parentHref, chapter) => {
-  addTocByHref(parentHref, chapter);
-  updateTocView();
+EventBus.on("addChapter", (res) => {
+  console.log("addChapter", res);
+  addTocByHref(res.href, res.chapter); //toc里面添加
+  console.log("res.chapter.href", res.chapter.href);
+  updateTocView(res.chapter.href); //重新布局目录
+});
+
+//更新内容
+const updateCurChapter = (href) => {
+  //从数据库里面获取内容
+  const chapter = ipcRenderer.sendSync(
+    "db-get-chapter",
+    metaData.value.bookId,
+    href
+  );
+  //显示内容
+  curChapter.value = chapter.data;
+};
+
+//更新目录，重新载入编辑内容
+EventBus.on("updateToc", (href) => {
+  //更新目录
+  updateTocView(href);
+  //更新右边内容
+  updateCurChapter(href);
 });
 </script>
 

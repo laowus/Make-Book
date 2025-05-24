@@ -23,8 +23,8 @@ const { ipcRenderer } = window.require("electron");
 **/
 export const useBookStore = defineStore("bookStore", {
   state: () => ({
-    metaData: {}, //书籍信息
-    toc: [], //目录
+    metaData: null, //书籍信息
+    toc: null, //目录
     curChapter: {
       bookId: 0,
       href: "",
@@ -84,13 +84,7 @@ export const useBookStore = defineStore("bookStore", {
           console.error("插入章节数据失败:", res.message);
         }
       });
-      ipcRenderer.send("db-insert-chapter", {
-        bookId: this.metaData.bookId,
-        title: item.label,
-        href: item.href,
-        content: "这里输入章节内容",
-        isHand: true,
-      });
+      ipcRenderer.send("db-insert-chapter", item);
     },
     findTocByHref(href) {
       const findItem = (href, items) => {

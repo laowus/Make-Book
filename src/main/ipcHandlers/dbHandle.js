@@ -9,6 +9,7 @@ const {
 
 const dbHandle = () => {
   ipcMain.on("db-insert-book", (event, book) => {
+    console.log("db-insert-book", book);
     insertBook(book, event);
   });
   ipcMain.on("db-insert-chapter", (event, chapter) => {

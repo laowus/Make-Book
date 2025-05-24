@@ -153,8 +153,7 @@ const createLeftMenu = (book, bookId) => {
     author: book.metadata.author,
     description: book.metadata.description,
   };
-  bookStore.setMetaData(metaData); // 将 metaData 数据保存到 tocStore 中
-
+  bookStore.setMetaData(metaData);
   const title = formatLanguageMap(book.metadata?.title) || "Untitled Book";
   $("#side-bar-cover").src = "";
   $("#side-bar-title").innerText = title;

@@ -129,7 +129,7 @@ const insertChapter = (chapter, event) => {
     `
     INSERT INTO ee_chapter (bookId, title, href, content, createTime, updateTime)
      VALUES (? , ?, ?, ?,  datetime('now'), datetime('now'))`,
-    [chapter.bookId, chapter.title, chapter.href, chapter.content],
+    [chapter.bookId, chapter.label, chapter.href, chapter.content],
     function (err) {
       const insertStr = chapter.isHand
         ? "db-hand-insert-chapter-response"

@@ -2,12 +2,12 @@
 import { ref, onMounted, inject, toRaw } from "vue";
 import { storeToRefs } from "pinia";
 import { ElMessage } from "element-plus";
-import EventBus from "./common/EventBus";
+import EventBus from "../common/EventBus";
 import WindowCtr from "./WindowCtr.vue";
 const { ipcRenderer } = window.require("electron");
 import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
-import { useBookStore } from "./store/bookStore";
-const { curChapter, metaData, toc } = storeToRefs(useBookStore());
+import { useBookStore } from "../store/bookStore";
+const { curChapter, metaData, toc, isFirst } = storeToRefs(useBookStore());
 const { addTocByHref, setMetaData } = useBookStore();
 
 const curIndex = ref(0);
@@ -33,31 +33,34 @@ const initDom = () => {
         readTxtFile(newFile.path).then((data) => {
           fileStr = newFile.ext === "html" ? getTextFromHTML(data) : data;
           console.log(fileStr);
-          //插入数据库, 并更新章节列表
-          if (metaData.value.name === "") {
+          if (metaData) {
+            //如果第一次导入,则设置元数据
             const meta = {
-              bookId: 0,
               title: file.name.split(".")[0],
               author: "Unknown",
               description: "Unknown",
               cover: "",
-              ext: newFile.ext,
             };
-            setMetaData(meta);
+            ipcRenderer.once("db-insert-book-response", (event, data) => {
+              console.log("db-insert-book-response", data);
+              if (data.success) {
+                console.log("插入成功", data);
+                meta.bookId = data.bookId;
+                setMetaData(meta);
+                const chapter = {
+                  bookId: metaData.value.bookId,
+                  label: metaData.value.title,
+                  href: `OPS/chapter-${Date.now()}`,
+                  content: fileStr,
+                };
+                toc.value = [chapter];
+                EventBus.emit("addChapter", { href: null, chapter: chapter });
+              } else {
+                ElMessage.error("插入失败");
+              }
+            });
+            ipcRenderer.send("db-insert-book", meta);
           }
-          const chapter = {
-            label: file.name.split(".")[0],
-            href: `OPS/chapter-${Date.now()}`,
-            subitems: null,
-          };
-          if (toc.value.length === 0) {
-            toc.value = [chapter];
-          } else {
-            //添加到上一个选择的章节下
-            // addTocByHref(curChapter.value.href, chapter);
-            EventBus.on("addChapter", curChapter.value.href, chapter);
-          }
-          curChapter.value = chapter;
         });
       }
     } else {
