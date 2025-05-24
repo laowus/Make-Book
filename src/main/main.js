@@ -6,10 +6,11 @@ const path = require("path");
 const fs = require("fs");
 const Store = require("electron-store");
 const store = new Store();
-
+const { initDatabase } = require("./dbtool");
 let resourcesRoot = path.resolve(app.getAppPath());
 let publicRoot = path.join(__dirname, "../../public");
-
+const dbHandle = require("./ipcHandlers/dbHandle");
+const fileHandle = require("./ipcHandlers/fileHandle");
 if (!isDevEnv) {
   resourcesRoot = path.dirname(resourcesRoot);
   publicRoot = path.join(__dirname, "../../dist");
@@ -39,6 +40,8 @@ if (!singleInstance) {
     }
   });
 }
+dbHandle();
+fileHandle();
 
 const startup = () => {
   init();
@@ -173,6 +176,7 @@ const initWindowBounds = (win) => {
 
 const init = () => {
   app.whenReady().then(async () => {
+    await initDatabase();
     mainWin = createWindow();
     initWindowBounds(mainWin);
   });

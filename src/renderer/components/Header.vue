@@ -2,7 +2,14 @@
 import { ref, onMounted, inject, toRaw } from "vue";
 import { storeToRefs } from "pinia";
 import { ElMessage } from "element-plus";
+import EventBus from "./common/EventBus";
 import WindowCtr from "./WindowCtr.vue";
+const { ipcRenderer } = window.require("electron");
+import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
+import { useBookStore } from "./store/bookStore";
+const { curChapter, metaData, toc } = storeToRefs(useBookStore());
+const { addTocByHref, setMetaData } = useBookStore();
+
 const curIndex = ref(0);
 const indentNum = ref(2);
 const changeTab = (index) => {
@@ -14,6 +21,54 @@ const reg = {
   aft: ["", "章", "回", "节", "集", "部", "篇", "部分"],
   selected: [1, 1],
 };
+
+const initDom = () => {
+  $("#add-file").addEventListener("change", (e) => {
+    // 检查用户是否选择了文件
+    if (e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const newFile = parseFile(file);
+      if (newFile.ext === "txt" || newFile.ext === "html") {
+        let fileStr = "";
+        readTxtFile(newFile.path).then((data) => {
+          fileStr = newFile.ext === "html" ? getTextFromHTML(data) : data;
+          console.log(fileStr);
+          //插入数据库, 并更新章节列表
+          if (metaData.value.name === "") {
+            const meta = {
+              bookId: 0,
+              title: file.name.split(".")[0],
+              author: "Unknown",
+              description: "Unknown",
+              cover: "",
+              ext: newFile.ext,
+            };
+            setMetaData(meta);
+          }
+          const chapter = {
+            label: file.name.split(".")[0],
+            href: `OPS/chapter-${Date.now()}`,
+            subitems: null,
+          };
+          if (toc.value.length === 0) {
+            toc.value = [chapter];
+          } else {
+            //添加到上一个选择的章节下
+            // addTocByHref(curChapter.value.href, chapter);
+            EventBus.on("addChapter", curChapter.value.href, chapter);
+          }
+          curChapter.value = chapter;
+        });
+      }
+    } else {
+      console.log("用户未选择文件");
+    }
+  });
+  $("#add-file-btn").addEventListener("click", () => $("#add-file").click());
+};
+onMounted(() => {
+  initDom();
+});
 </script>
 <template>
   <div class="header">
@@ -61,11 +116,11 @@ const reg = {
         <div v-show="curIndex === 0">
           <input
             type="file"
-            id="add-epub-file"
+            id="add-file"
             hidden
             accept=".txt,.html,.epub,.mobi,.azw3"
           />
-          <button class="btn-icon" id="add-epub-btn">
+          <button class="btn-icon" id="add-file-btn">
             <span class="iconfont icon-Epub" style="color: green"></span>
             <span>导入文件</span>
           </button>
