@@ -36,7 +36,6 @@ const scrollRightWrapperToTop = () => {
 watch(
   curChapter,
   (val) => {
-    console.log("watch txtEditor curChapter", val);
     queueMicrotask(() => {
       const textarea = editArea.value;
       const lineHeight = parseInt(getComputedStyle(textarea).lineHeight);
@@ -44,7 +43,6 @@ watch(
       const rows = Math.ceil(scrollHeight / lineHeight);
       line(rows);
       scrollRightWrapperToTop();
-      console.log("watch curChapter", val);
       if (val && Object.keys(val).length > 0) {
         try {
           ipcRenderer.sendSync("db-update-chapter", toRaw(val));

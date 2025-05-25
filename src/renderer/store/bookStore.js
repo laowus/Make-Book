@@ -23,6 +23,7 @@ const { ipcRenderer } = window.require("electron");
 **/
 export const useBookStore = defineStore("bookStore", {
   state: () => ({
+    isFirst: true,
     metaData: null, //书籍信息
     toc: null, //目录
     curChapter: {
@@ -60,13 +61,10 @@ export const useBookStore = defineStore("bookStore", {
       };
       removeItem(this.toc);
     },
+    // 插入数据库中 并更新目录以及当前章节
     addTocByHref(href, item) {
-      // const item = {
-      //   label: "新章节",
-      //   href: `OPS/chapter-${Date.now()}`,
-      //   subitems: null,
-      // };
-      ipcRenderer.once("db-hand-insert-chapter-response", (event, res) => {
+      ipcRenderer.once("db-insert-chapter-response", (event, res) => {
+        console.log("addTocByHref db-insert-book-response", res);
         if (res.success) {
           if (href) {
             //获取要插入的父级元素
@@ -77,8 +75,13 @@ export const useBookStore = defineStore("bookStore", {
               parentItem.subitems = [item];
             }
           } else {
+            console.log("08 addTocByHref", this.toc, item);
+            if (!this.toc) {
+              this.toc = []; 
+            }
             this.toc.push(item);
           }
+          // 发送更新目录事件
           EventBus.emit("updateToc", item.href);
         } else {
           console.error("插入章节数据失败:", res.message);

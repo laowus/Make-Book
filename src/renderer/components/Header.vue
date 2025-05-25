@@ -8,7 +8,7 @@ const { ipcRenderer } = window.require("electron");
 import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
 import { useBookStore } from "../store/bookStore";
 const { curChapter, metaData, toc, isFirst } = storeToRefs(useBookStore());
-const { addTocByHref, setMetaData } = useBookStore();
+const { addTocByHref, setMetaData, setToc } = useBookStore();
 
 const curIndex = ref(0);
 const indentNum = ref(2);
@@ -28,13 +28,13 @@ const initDom = () => {
     if (e.target.files.length > 0) {
       const file = e.target.files[0];
       const newFile = parseFile(file);
+      console.log(" 01 newFile", newFile);
       if (newFile.ext === "txt" || newFile.ext === "html") {
         let fileStr = "";
         readTxtFile(newFile.path).then((data) => {
           fileStr = newFile.ext === "html" ? getTextFromHTML(data) : data;
-          console.log(fileStr);
-          if (metaData) {
-            //如果第一次导入,则设置元数据
+          if (isFirst.value) {
+            console.log(" 02 第一次", metaData.value);
             const meta = {
               title: file.name.split(".")[0],
               author: "Unknown",
@@ -42,9 +42,8 @@ const initDom = () => {
               cover: "",
             };
             ipcRenderer.once("db-insert-book-response", (event, data) => {
-              console.log("db-insert-book-response", data);
+              console.log("03 db-insert-book-response", data);
               if (data.success) {
-                console.log("插入成功", data);
                 meta.bookId = data.bookId;
                 setMetaData(meta);
                 const chapter = {
@@ -53,13 +52,24 @@ const initDom = () => {
                   href: `OPS/chapter-${Date.now()}`,
                   content: fileStr,
                 };
-                toc.value = [chapter];
+                // setToc([chapter]);
+                console.log("04 toc.value", toc.value);
                 EventBus.emit("addChapter", { href: null, chapter: chapter });
+                isFirst.value = false;
               } else {
                 ElMessage.error("插入失败");
               }
             });
             ipcRenderer.send("db-insert-book", meta);
+          } else {
+            const chapter = {
+              bookId: metaData.value.bookId,
+              label: file.name.split(".")[0],
+              href: `OPS/chapter-${Date.now()}`,
+              content: fileStr,
+              isHand: true,
+            };
+            EventBus.emit("addChapter", { href: null, chapter: chapter });
           }
         });
       }

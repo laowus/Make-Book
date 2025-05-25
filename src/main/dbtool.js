@@ -131,15 +131,11 @@ const insertChapter = (chapter, event) => {
      VALUES (? , ?, ?, ?,  datetime('now'), datetime('now'))`,
     [chapter.bookId, chapter.label, chapter.href, chapter.content],
     function (err) {
-      const insertStr = chapter.isHand
-        ? "db-hand-insert-chapter-response"
-        : "db-insert-chapter-response";
-      console.log("insertStr", insertStr);
       if (err) {
         console.error(err.message);
-        event.reply(insertStr, { success: false }); // 发送失败响应
+        event.reply("db-insert-chapter-response", { success: false }); // 发送失败响应
       } else {
-        event.reply(insertStr, {
+        event.reply("db-insert-chapter-response", {
           success: true,
           id: this.lastID,
         }); // 发送成功响应

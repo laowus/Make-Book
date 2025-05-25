@@ -12,7 +12,9 @@ const { curChapter, metaData, toc } = storeToRefs(useBookStore());
 let tocView;
 //重新布局目录
 const updateTocView = (curhref) => {
-  console.log("curhref", curhref);
+  
+  console.log("toc", toc.value);
+  tocView = null;
   tocView = createTOCView(
     toc.value,
     (href) => {
@@ -31,14 +33,16 @@ const updateTocView = (curhref) => {
 };
 
 EventBus.on("addChapter", (res) => {
-  console.log("addChapter", res);
-  addTocByHref(res.href, res.chapter); //toc里面添加
-  console.log("res.chapter.href", res.chapter.href);
-  updateTocView(res.chapter.href); //重新布局目录
+  console.log("05 addChapter", res);
+  addTocByHref(res.href, res.chapter); //添加到数据库
 });
 
-//更新内容
+//更新右边内容
 const updateCurChapter = (href) => {
+  console.log("当前toc", toc.value);
+  console.log(
+    "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  );
   //从数据库里面获取内容
   const chapter = ipcRenderer.sendSync(
     "db-get-chapter",
@@ -51,10 +55,8 @@ const updateCurChapter = (href) => {
 
 //更新目录，重新载入编辑内容
 EventBus.on("updateToc", (href) => {
-  //更新目录
+  console.log("EventBus.onupdateToc", href);
   updateTocView(href);
-  //更新右边内容
-  updateCurChapter(href);
 });
 </script>
 
