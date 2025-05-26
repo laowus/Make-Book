@@ -72,6 +72,8 @@ const initDom = () => {
             EventBus.emit("addChapter", { href: null, chapter: chapter });
           }
         });
+      } else if (newFile.ext === "epub") {
+        
       }
     } else {
       console.log("用户未选择文件");
