@@ -1,4 +1,6 @@
 import { makeBook } from "./view.js";
+import { toRaw } from "vue";
+import { storeToRefs } from "pinia";
 import { useBookStore } from "../store/bookStore.js";
 import EventBus from "../common/EventBus";
 const path = window.require("path");
@@ -51,36 +53,56 @@ const saveCoverToLocal = (coverData, coverPath) => {
 };
 
 export const open = async (file) => {
+  const { setToc, setMetaData, setFirst } = useBookStore();
+  const { metaData, isFirst, toc } = storeToRefs(useBookStore());
   return new Promise(async (resolve, reject) => {
     console.log("file", file);
     const timestamp = Date.now();
-    const ext = file.name.match(/\.([^.]+)$/)?.[1] || "";
+    console.log("file.name", file.name);
+    // const ext = file.name.match(/\.([^.]+)$/)?.[1] || "";
     const book = await makeBook(file);
-    console.log("book", book);
-    const coverDir = ipcRenderer.sendSync("get-cover-dir", "ping");
-    let coverPath = "";
-    if (book.metadata.cover) {
-      coverPath = path.join(coverDir, timestamp + ".jpg");
-      await saveCoverToLocal(book.metadata.cover, coverPath);
-    }
-    //把文件信息添加到数据库中
-    ipcRenderer.send("db-insert-book", {
-      title: book.metadata.title,
-      author: book.metadata.author,
-      description: book.metadata.description,
-      cover: coverPath,
-      path: file.path,
-    });
-    ipcRenderer.once("db-insert-book-response", (event, res) => {
-      bookId = res.bookId;
-      createLeftMenu(book, bookId);
-      insertChapter(book, bookId).then(() => {
-        console.log("bookId", bookId);
-        const firstChapter = ipcRenderer.sendSync("db-first-chapter", bookId);
-        console.log("firstChapter", firstChapter);
-        resolve(firstChapter);
+
+    if (isFirst.value) {
+      console.log("book", book);
+      const coverDir = ipcRenderer.sendSync("get-cover-dir", "ping");
+      let coverPath = "";
+      if (book.metadata.cover) {
+        coverPath = path.join(coverDir, timestamp + ".jpg");
+        await saveCoverToLocal(book.metadata.cover, coverPath);
+      }
+      let _metaData = {
+        title: book.metadata.title,
+        author: book.metadata.author,
+        description: book.metadata.description,
+        cover: coverPath,
+        path: file.path,
+      }; //把文件信息添加到数据库中
+      ipcRenderer.send("db-insert-book", _metaData);
+      ipcRenderer.once("db-insert-book-response", (event, res) => {
+        bookId = res.bookId;
+        setMetaData({ ..._metaData, bookId: bookId });
+        insertChapter(book, bookId).then(() => {
+          console.log("bookId", bookId);
+          setToc(book.toc);
+          setFirst(false);
+          const firstChapter = ipcRenderer.sendSync("db-first-chapter", bookId);
+          console.log("const open firstChapter", firstChapter.data);
+          resolve(firstChapter.data);
+          EventBus.emit("updateToc", firstChapter.data.href);
+        });
       });
-    });
+    } else {
+      console.log("not first", isFirst.value);
+      const bookId = metaData.value.bookId;
+      insertChapter(book, bookId).then(() => {
+        const newToc = [...toRaw(toc.value), ...book.toc];
+        setToc(newToc);
+        const firstChapter = ipcRenderer.sendSync("db-first-chapter", bookId);
+        console.log("const open firstChapter", firstChapter.data);
+        resolve(firstChapter.data);
+        EventBus.emit("updateToc", firstChapter.data.href);
+      });
+    }
   });
 };
 
@@ -110,7 +132,7 @@ const insertChapter = async (book, bookId) => {
         try {
           await new Promise((resolve, reject) => {
             ipcRenderer.send("db-insert-chapter", {
-              title: newTocItem.label,
+              label: newTocItem.label,
               href: newTocItem.href,
               content: newTocItem.html,
               bookId: bookId,

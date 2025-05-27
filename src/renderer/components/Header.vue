@@ -5,10 +5,11 @@ import { ElMessage } from "element-plus";
 import EventBus from "../common/EventBus";
 import WindowCtr from "./WindowCtr.vue";
 const { ipcRenderer } = window.require("electron");
+import { open } from "../libs/parseBook.js";
 import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
 import { useBookStore } from "../store/bookStore";
 const { curChapter, metaData, toc, isFirst } = storeToRefs(useBookStore());
-const { addTocByHref, setMetaData, setToc } = useBookStore();
+const { addTocByHref, setMetaData, setToc, setFirst } = useBookStore();
 
 const curIndex = ref(0);
 const indentNum = ref(2);
@@ -52,10 +53,10 @@ const initDom = () => {
                   href: `OPS/chapter-${Date.now()}`,
                   content: fileStr,
                 };
-                // setToc([chapter]);
+                //setToc([chapter]);
                 console.log("04 toc.value", toc.value);
                 EventBus.emit("addChapter", { href: null, chapter: chapter });
-                isFirst.value = false;
+                setFirst(false);
               } else {
                 ElMessage.error("插入失败");
               }
@@ -73,7 +74,9 @@ const initDom = () => {
           }
         });
       } else if (newFile.ext === "epub") {
-        
+        open(newFile.path).then((res) => {
+          console.log(" 02 open", res);
+        });
       }
     } else {
       console.log("用户未选择文件");

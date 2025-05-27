@@ -12,7 +12,7 @@ const { curChapter, metaData, toc } = storeToRefs(useBookStore());
 let tocView;
 //重新布局目录
 const updateTocView = (curhref) => {
-  console.log("toc", toc.value);
+  console.log("updateTocViewtoc", toc.value);
   tocView = null;
   tocView = createTOCView(
     toc.value,
@@ -48,6 +48,7 @@ const updateCurChapter = (href) => {
     metaData.value.bookId,
     href
   );
+  console.log("当前章节", chapter);
   //显示内容
   curChapter.value = chapter.data;
   tocView.setCurrentHref(href);

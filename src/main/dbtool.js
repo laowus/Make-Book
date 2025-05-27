@@ -89,7 +89,7 @@ const createTable = () => {
     `CREATE TABLE ee_chapter (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             bookId INTEGER,
-            title TEXT,
+            label TEXT,
             href TEXT,
             content TEXT,
             createTime TEXT,
@@ -127,7 +127,7 @@ const insertBook = (book, event) => {
 const insertChapter = (chapter, event) => {
   db.run(
     `
-    INSERT INTO ee_chapter (bookId, title, href, content, createTime, updateTime)
+    INSERT INTO ee_chapter (bookId, label, href, content, createTime, updateTime)
      VALUES (? , ?, ?, ?,  datetime('now'), datetime('now'))`,
     [chapter.bookId, chapter.label, chapter.href, chapter.content],
     function (err) {
@@ -160,6 +160,7 @@ const getFirstChapter = (bookId, event) => {
 };
 
 const getChapter = (bookId, href, event) => {
+  console.log("getChapter", bookId, href);
   db.get(
     `SELECT * FROM ee_chapter WHERE bookId =? AND href =? `,
     [bookId, href],

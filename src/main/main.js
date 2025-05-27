@@ -144,6 +144,12 @@ ipcMain.on("window-close", (event) => {
   const win = BrowserWindow.fromWebContents(webContent);
   win.hide();
 });
+
+const sendToRenderer = (channel, args) => {
+  try {
+    if (mainWin) mainWin.webContents.send(channel, args);
+  } catch (error) {}
+};
 // 动态生成上下文菜单
 const generateContextMenu = () => {
   return Menu.buildFromTemplate([
