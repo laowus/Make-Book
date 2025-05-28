@@ -82,25 +82,25 @@ export const open = async (file) => {
         bookId = res.bookId;
         setMetaData({ ..._metaData, bookId: bookId });
         insertChapter(book, bookId).then(() => {
-          console.log("bookId", bookId);
           setToc(book.toc);
           setFirst(false);
           const firstChapter = ipcRenderer.sendSync("db-first-chapter", bookId);
           console.log("const open firstChapter", firstChapter.data);
           resolve(firstChapter.data);
-          EventBus.emit("updateToc", firstChapter.data.href);
+          EventBus.emit("updateToc", firstChapter.data.id);
         });
       });
     } else {
-      console.log("not first", isFirst.value);
       const bookId = metaData.value.bookId;
       insertChapter(book, bookId).then(() => {
         const newToc = [...toRaw(toc.value), ...book.toc];
+        console.log("book.toc", book.toc);
         setToc(newToc);
-        const firstChapter = ipcRenderer.sendSync("db-first-chapter", bookId);
-        console.log("const open firstChapter", firstChapter.data);
-        resolve(firstChapter.data);
-        EventBus.emit("updateToc", firstChapter.data.href);
+        // const book.toc[0]
+        // const firstChapter = ipcRenderer.sendSync("db-first-chapter", bookId);
+        // console.log("const open firstChapter", firstChapter.data);
+        //resolve();
+        EventBus.emit("updateToc", book.toc[0].href);
       });
     }
   });
@@ -140,6 +140,8 @@ const insertChapter = async (book, bookId) => {
             // 监听插入响应
             ipcRenderer.once("db-insert-chapter-response", (event, res) => {
               if (res.success) {
+                console.log(res.id, item.href);
+                item.href = res.id;
                 resolve();
               } else {
                 reject(new Error(`插入失败: ${res.message}`));

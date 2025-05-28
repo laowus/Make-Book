@@ -4,6 +4,7 @@ const {
   insertChapter,
   getFirstChapter,
   getChapter,
+  getChapters,
   updateChapter,
 } = require("../dbtool.js");
 
@@ -21,9 +22,11 @@ const dbHandle = () => {
   ipcMain.on("db-get-chapter", (event, bookId, href) => {
     getChapter(bookId, href, event);
   });
+  ipcMain.on("db-get-chapters", (event, bookId) => {
+    getChapters(bookId, event);
+  });
 
   ipcMain.on("db-update-chapter", (event, chapter) => {
-    console.log("db-update-chapter", chapter);
     updateChapter(chapter.bookId, chapter.href, chapter.content, event);
   });
 };

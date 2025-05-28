@@ -70,7 +70,7 @@ export const useBookStore = defineStore("bookStore", {
         if (res.success) {
           const item = {
             label: tocItem.label,
-            href: tocItem.href,
+            href: res.id,
             subitems: null,
           };
           if (href) {

@@ -144,6 +144,21 @@ const insertChapter = (chapter, event) => {
   );
 };
 
+const getChapters = (bookId, event) => {
+  db.get(
+    `SELECT id, label, href FROM ee_chapter WHERE bookId =? `,
+    [bookId],
+    (err, rows) => {
+      if (err) {
+        console.error(err.message);
+        event.returnValue = { success: false };
+      } else {
+        event.returnValue = { success: true, data: rows };
+      }
+    }
+  );
+};
+
 const getFirstChapter = (bookId, event) => {
   db.get(
     `SELECT * FROM ee_chapter WHERE bookId = ? ORDER BY id ASC LIMIT 1`,
@@ -162,7 +177,7 @@ const getFirstChapter = (bookId, event) => {
 const getChapter = (bookId, href, event) => {
   console.log("getChapter", bookId, href);
   db.get(
-    `SELECT * FROM ee_chapter WHERE bookId =? AND href =? `,
+    `SELECT * FROM ee_chapter WHERE bookId =? AND id =? `,
     [bookId, href],
     (err, rows) => {
       if (err) {

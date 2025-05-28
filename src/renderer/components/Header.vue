@@ -29,13 +29,11 @@ const initDom = () => {
     if (e.target.files.length > 0) {
       const file = e.target.files[0];
       const newFile = parseFile(file);
-      console.log(" 01 newFile", newFile);
       if (newFile.ext === "txt" || newFile.ext === "html") {
         let fileStr = "";
         readTxtFile(newFile.path).then((data) => {
           fileStr = newFile.ext === "html" ? getTextFromHTML(data) : data;
           if (isFirst.value) {
-            console.log(" 02 第一次", metaData.value);
             const meta = {
               title: file.name.split(".")[0],
               author: "Unknown",
@@ -43,7 +41,6 @@ const initDom = () => {
               cover: "",
             };
             ipcRenderer.once("db-insert-book-response", (event, data) => {
-              console.log("03 db-insert-book-response", data);
               if (data.success) {
                 meta.bookId = data.bookId;
                 setMetaData(meta);
@@ -53,8 +50,6 @@ const initDom = () => {
                   href: `OPS/chapter-${Date.now()}`,
                   content: fileStr,
                 };
-                //setToc([chapter]);
-                console.log("04 toc.value", toc.value);
                 EventBus.emit("addChapter", { href: null, chapter: chapter });
                 setFirst(false);
               } else {

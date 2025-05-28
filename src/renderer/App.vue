@@ -10,9 +10,11 @@ const { ipcRenderer } = window.require("electron");
 const { addTocByHref } = useBookStore();
 const { curChapter, metaData, toc } = storeToRefs(useBookStore());
 let tocView;
+
 //重新布局目录
 const updateTocView = (curhref) => {
-  console.log("updateTocViewtoc", toc.value);
+  console.log("重新布局目录updateTocView", toc.value);
+
   tocView = null;
   tocView = createTOCView(
     toc.value,
@@ -32,23 +34,18 @@ const updateTocView = (curhref) => {
 };
 
 EventBus.on("addChapter", (res) => {
-  console.log("05 addChapter", res);
   addTocByHref(res.href, res.chapter); //添加到数据库
 });
 
 //更新右边内容
 const updateCurChapter = (href) => {
-  console.log("当前toc", toc.value);
-  console.log(
-    "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-  );
+  console.log("updateCurChapter", href);
   //从数据库里面获取内容
   const chapter = ipcRenderer.sendSync(
     "db-get-chapter",
     metaData.value.bookId,
     href
   );
-  console.log("当前章节", chapter);
   //显示内容
   curChapter.value = chapter.data;
   tocView.setCurrentHref(href);
