@@ -5,7 +5,7 @@ import { ElMessage } from "element-plus";
 import EventBus from "../common/EventBus";
 import WindowCtr from "./WindowCtr.vue";
 const { ipcRenderer } = window.require("electron");
-import { open } from "../libs/parseBook.js";
+import { open, openMobi } from "../libs/parseBook.js";
 import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
 import { useBookStore } from "../store/bookStore";
 const { curChapter, metaData, toc, isFirst } = storeToRefs(useBookStore());
@@ -70,6 +70,10 @@ const initDom = () => {
         });
       } else if (newFile.ext === "epub") {
         open(newFile.path).then((res) => {
+          console.log(" 02 open", res);
+        });
+      } else if (newFile.ext === "mobi") {
+        openMobi(newFile.path).then((res) => {
           console.log(" 02 open", res);
         });
       }

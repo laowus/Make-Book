@@ -61,7 +61,6 @@ export const open = async (file) => {
     console.log("file.name", file.name);
     // const ext = file.name.match(/\.([^.]+)$/)?.[1] || "";
     const book = await makeBook(file);
-
     if (isFirst.value) {
       console.log("book", book);
       const coverDir = ipcRenderer.sendSync("get-cover-dir", "ping");
@@ -96,11 +95,47 @@ export const open = async (file) => {
         const newToc = [...toRaw(toc.value), ...book.toc];
         console.log("book.toc", book.toc);
         setToc(newToc);
-        // const book.toc[0]
-        // const firstChapter = ipcRenderer.sendSync("db-first-chapter", bookId);
-        // console.log("const open firstChapter", firstChapter.data);
-        //resolve();
         EventBus.emit("updateToc", book.toc[0].href);
+      });
+    }
+  });
+};
+
+export const openMobi = async (file) => {
+  const { setToc, setMetaData, setFirst } = useBookStore();
+  const { metaData, isFirst, toc } = storeToRefs(useBookStore());
+  return new Promise(async (resolve, reject) => {
+    const timestamp = Date.now();
+    const book = await makeBook(file);
+    console.log("book", book);
+    if (isFirst.value) {
+      const coverDir = ipcRenderer.sendSync("get-cover-dir", "ping");
+      let coverPath = "";
+      if (book.metadata.cover) {
+        coverPath = path.join(coverDir, timestamp + ".jpg");
+        await saveCoverToLocal(book.metadata.cover, coverPath);
+      }
+      let _metaData = {
+        title: book.metadata.title,
+        author: book.metadata.author,
+        description: book.metadata.description,
+        cover: coverPath,
+        path: file.path,
+      }; //把文件信息添加到数据库中
+      console.log("_metaData", _metaData);
+      ipcRenderer.send("db-insert-book", _metaData);
+      ipcRenderer.once("db-insert-book-response", (event, res) => {
+        bookId = res.bookId;
+        setMetaData({ ..._metaData, bookId: bookId });
+        setToc(book.toc);
+        setFirst(false);
+        for (const tocItem of book.toc) {
+          Promise.resolve(book.resolveHref(tocItem.href)).then((res) => {
+            book.sections[res.index].loadText().then((doc) => {
+              console.log("doc", doc);
+            });
+          });
+        }
       });
     }
   });
@@ -122,10 +157,11 @@ const insertChapter = async (book, bookId) => {
         return [section.id, getTextFromHTML(doc.documentElement.outerHTML)];
       })
     );
-    // console.log("sectionInfoArray", sectionInfoArray);
+    console.log("sectionInfoArray", sectionInfoArray);
     const sectionInfoMap = Object.fromEntries(sectionInfoArray);
 
     const insertTocItem = async (item) => {
+      console.log("item", item);
       let newTocItem = { ...item }; // 复制 item 的属性
       if (sectionInfoMap[item.href]) {
         newTocItem.html = sectionInfoMap[item.href];
@@ -164,28 +200,5 @@ const insertChapter = async (book, bookId) => {
     }
   } catch (err) {
     console.error("处理文件时出错:", err);
-  }
-};
-
-//生成目录
-const createLeftMenu = (book, bookId) => {
-  const bookStore = useBookStore(); // 获取 tocStore 实例
-  bookStore.setToc(book.toc); // 将 toc 数据保存到 tocStore 中
-  const metaData = {
-    bookId: bookId,
-    title: book.metadata.title,
-    author: book.metadata.author,
-    description: book.metadata.description,
-  };
-  bookStore.setMetaData(metaData);
-  const title = formatLanguageMap(book.metadata?.title) || "Untitled Book";
-  $("#side-bar-cover").src = "";
-  $("#side-bar-title").innerText = title;
-  $("#side-bar-author").innerText = formatContributor(book.metadata?.author);
-  Promise.resolve(book.getCover?.())?.then((blob) =>
-    blob ? ($("#side-bar-cover").src = URL.createObjectURL(blob)) : null
-  );
-  if (book.toc.length > 0) {
-    EventBus.emit("updateToc", book.toc[0].href);
   }
 };
