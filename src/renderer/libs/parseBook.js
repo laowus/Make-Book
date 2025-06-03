@@ -58,8 +58,6 @@ export const open = async (file) => {
   return new Promise(async (resolve, reject) => {
     console.log("file", file);
     const timestamp = Date.now();
-    console.log("file.name", file.name);
-    // const ext = file.name.match(/\.([^.]+)$/)?.[1] || "";
     const book = await makeBook(file);
     if (isFirst.value) {
       console.log("book", book);
@@ -101,38 +99,6 @@ export const open = async (file) => {
   });
 };
 
-export const openMobi = async (file) => {
-  const { setToc, setMetaData, setFirst } = useBookStore();
-  const { metaData, isFirst, toc } = storeToRefs(useBookStore());
-  return new Promise(async (resolve, reject) => {
-    const timestamp = Date.now();
-    const book = await makeBook(file);
-    console.log("book", book);
-    if (isFirst.value) {
-      const coverDir = ipcRenderer.sendSync("get-cover-dir", "ping");
-      let coverPath = "";
-      if (book.metadata.cover) {
-        coverPath = path.join(coverDir, timestamp + ".jpg");
-        await saveCoverToLocal(book.metadata.cover, coverPath);
-      }
-      let _metaData = {
-        title: book.metadata.title,
-        author: book.metadata.author,
-        description: book.metadata.description,
-        cover: coverPath,
-        path: file.path,
-      }; //把文件信息添加到数据库中
-      console.log("_metaData", _metaData);
-      ipcRenderer.send("db-insert-book", _metaData);
-      ipcRenderer.once("db-insert-book-response", (event, res) => {
-        bookId = res.bookId;
-        setMetaData({ ..._metaData, bookId: bookId });
-        // 定义一个异步函数来顺序处理 tocItem
-      });
-    }
-  });
-};
-
 // 定义一个函数来提取 HTML 字符串中的纯文本
 const getTextFromHTML = (htmlString) => {
   const parser = new DOMParser();
@@ -142,29 +108,31 @@ const getTextFromHTML = (htmlString) => {
 
 // 插入章节以及内容加入数据库
 const insertChapter = async (book, bookId) => {
+  // [href, content]
   const insertTocItem = async (item) => {
-    // 等待 resolveHref 完成
-    const res = await Promise.resolve(book.resolveHref(item.href));
+    const res = await book.resolveHref(item.href);
     // 等待 createDocument 完成
-    await book.sections[res.index].createDocument().then((doc) => {
-      const str = getTextFromHTML(doc.documentElement.outerHTML);
+    const doc = await book.sections[res.index].createDocument();
+    const str = getTextFromHTML(doc.documentElement.outerHTML);
+    // 封装发送请求和监听响应为一个 Promise
+    await new Promise((resolve, reject) => {
+      ipcRenderer.once("db-insert-chapter-response", (event, response) => {
+        if (response.success) {
+          item.href = response.id;
+          resolve();
+        } else {
+          reject(new Error(`插入失败: ${response.message}`));
+        }
+      });
+      // 发送插入请求
       ipcRenderer.send("db-insert-chapter", {
         label: item.label,
         href: item.href,
         content: str,
         bookId: bookId,
       });
-      // 监听插入响应
-      ipcRenderer.once("db-insert-chapter-response", (event, res) => {
-        if (res.success) {
-          console.log(res.id, item.href);
-          item.href = res.id;
-          resolve();
-        } else {
-          reject(new Error(`插入失败: ${res.message}`));
-        }
-      });
     });
+
     if (item.subitems) {
       for (const subitem of item.subitems) {
         await insertTocItem(subitem);
