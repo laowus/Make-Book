@@ -68,12 +68,8 @@ const initDom = () => {
             EventBus.emit("addChapter", { href: null, chapter: chapter });
           }
         });
-      } else if (newFile.ext === "epub") {
+      } else if (newFile.ext === "epub" || newFile.ext === "mobi") {
         open(newFile.path).then((res) => {
-          console.log(" 02 open", res);
-        });
-      } else if (newFile.ext === "mobi") {
-        openMobi(newFile.path).then((res) => {
           console.log(" 02 open", res);
         });
       }

@@ -127,15 +127,7 @@ export const openMobi = async (file) => {
       ipcRenderer.once("db-insert-book-response", (event, res) => {
         bookId = res.bookId;
         setMetaData({ ..._metaData, bookId: bookId });
-        setToc(book.toc);
-        setFirst(false);
-        for (const tocItem of book.toc) {
-          Promise.resolve(book.resolveHref(tocItem.href)).then((res) => {
-            book.sections[res.index].loadText().then((doc) => {
-              console.log("doc", doc);
-            });
-          });
-        }
+        // 定义一个异步函数来顺序处理 tocItem
       });
     }
   });
@@ -150,6 +142,43 @@ const getTextFromHTML = (htmlString) => {
 
 // 插入章节以及内容加入数据库
 const insertChapter = async (book, bookId) => {
+  const insertTocItem = async (item) => {
+    // 等待 resolveHref 完成
+    const res = await Promise.resolve(book.resolveHref(item.href));
+    // 等待 createDocument 完成
+    await book.sections[res.index].createDocument().then((doc) => {
+      const str = getTextFromHTML(doc.documentElement.outerHTML);
+      ipcRenderer.send("db-insert-chapter", {
+        label: item.label,
+        href: item.href,
+        content: str,
+        bookId: bookId,
+      });
+      // 监听插入响应
+      ipcRenderer.once("db-insert-chapter-response", (event, res) => {
+        if (res.success) {
+          console.log(res.id, item.href);
+          item.href = res.id;
+          resolve();
+        } else {
+          reject(new Error(`插入失败: ${res.message}`));
+        }
+      });
+    });
+    if (item.subitems) {
+      for (const subitem of item.subitems) {
+        await insertTocItem(subitem);
+      }
+    }
+  };
+  // 串行处理每个 toc 项
+  for (const tocItem of book.toc) {
+    await insertTocItem(tocItem);
+  }
+};
+
+// 插入章节以及内容加入数据库
+const insertChapters = async (book, bookId) => {
   try {
     const sectionInfoArray = await Promise.all(
       book.sections.map(async (section) => {

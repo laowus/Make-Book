@@ -135,6 +135,7 @@ const insertChapter = (chapter, event) => {
         console.error(err.message);
         event.reply("db-insert-chapter-response", { success: false }); // 发送失败响应
       } else {
+        console.log("db-insert-chapter-response id:", this.lastID);
         event.reply("db-insert-chapter-response", {
           success: true,
           id: this.lastID,
