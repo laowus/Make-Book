@@ -5,7 +5,7 @@ import { ElMessage } from "element-plus";
 import EventBus from "../common/EventBus";
 import WindowCtr from "./WindowCtr.vue";
 const { ipcRenderer } = window.require("electron");
-import { open, openMobi } from "../libs/parseBook.js";
+import { open } from "../libs/parseBook.js";
 import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
 import { useBookStore } from "../store/bookStore";
 const { curChapter, metaData, toc, isFirst } = storeToRefs(useBookStore());
