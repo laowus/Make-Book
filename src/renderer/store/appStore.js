@@ -8,6 +8,9 @@ export const useAppStore = defineStore("appStore", {
     ctxItem: {},
     ctxMenuSeparatorNums: 0,
     currentHref: "",
+    // 通用弹窗
+    tipShow: false,
+    tipText: null,
   }),
   getters: {},
   actions: {
@@ -30,6 +33,14 @@ export const useAppStore = defineStore("appStore", {
         });
         this.ctxMenuSeparatorNums = spCnt;
       }
+    },
+    showTip(text) {
+      this.tipShow = true;
+      this.tipText = text;
+    },
+    hideTip() {
+      this.tipShow = false;
+      this.tipText = null;
     },
   },
   // persist: {

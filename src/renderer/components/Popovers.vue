@@ -4,10 +4,10 @@ import { storeToRefs } from "pinia";
 import EventBus from "../common/EventBus";
 import { useAppStore } from "../store/appStore";
 import ContextMenu from "./ContextMenu.vue";
-const { ctxMenuShow, ctxMenuData, ctxMenuSeparatorNums } = storeToRefs(
-  useAppStore()
-);
-const { hideCtxMenu, showCtxMenu } = useAppStore();
+import Tip from "./Tip.vue";
+const { ctxMenuShow, ctxMenuData, ctxMenuSeparatorNums, tipShow, tipText } =
+  storeToRefs(useAppStore());
+const { hideCtxMenu, showCtxMenu, showTip, hideTip } = useAppStore();
 const ctxMenuPosStyle = reactive({ left: -999, top: -999 });
 let ctxMenuPos = null;
 const getCtxMenuAutoHeight = () => {
@@ -61,6 +61,11 @@ EventBus.on("commonCtxMenu-show", (event) => {
       :data="ctxMenuData"
     >
     </ContextMenu>
+    <Tip v-show="tipShow">
+      <template #text>
+        <p v-html="tipText"></p>
+      </template>
+    </Tip>
   </div>
 </template>
 
