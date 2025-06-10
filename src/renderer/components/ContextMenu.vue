@@ -7,6 +7,7 @@ import { useBookStore } from "../store/bookStore";
 const { currentHref } = storeToRefs(useAppStore());
 const { setCtxMenuData, hideCtxMenu } = useAppStore();
 const { delTocByHref } = useBookStore();
+const { metaData } = storeToRefs(useBookStore());
 
 const props = defineProps({
   posStyle: Object,
@@ -22,7 +23,15 @@ const MenuItems = {
     name: "新建最顶级章节",
     icon: "icon-xinjian",
     action: () => {
-      EventBus.emit("addChapter", null);
+      EventBus.emit("addChapter", {
+        herf: null,
+        chapter: {
+          bookId: metaData?.value.bookId,
+          label: "新章节",
+          href: `OPS/chapter-${Date.now()}`,
+          content: "这里输入内容(只为了提示你输入内容,删除修改为你要的内容)",
+        },
+      });
       hideCtxMenu();
     },
   },

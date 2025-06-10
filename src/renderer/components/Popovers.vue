@@ -52,6 +52,15 @@ EventBus.on("commonCtxMenu-show", (event) => {
   setMenuPosition(event);
   showCtxMenu();
 });
+
+EventBus.on("showTip", (text) => {
+  showTip(text);
+});
+
+EventBus.on("hideTip", () => {
+  showTip("插入完成!");
+  hideTip();
+});
 </script>
 <template>
   <div id="popovers">

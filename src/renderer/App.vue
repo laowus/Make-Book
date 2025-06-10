@@ -3,6 +3,7 @@ import { ref, provide, onMounted, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { createTOCView } from "./libs/ui/tree.js";
 import EventBus from "./common/EventBus";
+import Popovers from "./components/Popovers.vue";
 import Header from "./components/Header.vue";
 import TxtEditor from "./components/TxtEditor.vue";
 import { useBookStore } from "./store/bookStore";
@@ -23,7 +24,7 @@ const updateTocView = (curhref) => {
     },
     (href, event) => {
       updateCurChapter(href);
-      //showContextMenu(event, href);
+      showContextMenu(event, href);
     }
   );
   const tocViewElement = window.$("#toc-view");
@@ -36,7 +37,17 @@ const updateTocView = (curhref) => {
 EventBus.on("addChapter", (res) => {
   addTocByHref(res.href, res.chapter); //添加到数据库
 });
-
+const showContextMenu = (event, href) => {
+  //currentHref.value = href;
+  console.log("showContextMenu", href);
+  event.preventDefault();
+  setTimeout(() => {
+    //初始化菜单数据
+    EventBus.emit("commonCtxMenu-init", 0);
+    //显示菜单
+    EventBus.emit("commonCtxMenu-show", event);
+  }, 99);
+};
 //更新右边内容
 const updateCurChapter = (href) => {
   console.log("updateCurChapter", href);
@@ -60,6 +71,7 @@ EventBus.on("updateToc", (href) => {
 
 <template>
   <div class="container">
+    <Popovers></Popovers>
     <Header></Header>
     <div class="content">
       <div id="leftMenu">

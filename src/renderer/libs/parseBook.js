@@ -85,11 +85,13 @@ export const open = async (file) => {
           console.log("const open firstChapter", firstChapter.data);
           resolve(firstChapter.data);
           EventBus.emit("updateToc", firstChapter.data.id);
+          EventBus.emit("hideTip");
         });
       });
     } else {
       const bookId = metaData.value.bookId;
       insertChapter(book, bookId).then(() => {
+        EventBus.emit("hideTip");
         const newToc = [...toRaw(toc.value), ...book.toc];
         console.log("book.toc", book.toc);
         setToc(newToc);
@@ -104,6 +106,10 @@ const getTextFromHTML = (htmlString) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, "text/html");
   return doc.body.textContent || "";
+};
+
+const iCTip = (text) => {
+  EventBus.emit("showTip", text);
 };
 
 // 插入章节以及内容加入数据库
@@ -139,63 +145,11 @@ const insertChapter = async (book, bookId) => {
       }
     }
   };
-  // 串行处理每个 toc 项
-  for (const tocItem of book.toc) {
-    await insertTocItem(tocItem);
-  }
-};
-
-// 插入章节以及内容加入数据库
-const insertChapters = async (book, bookId) => {
-  try {
-    const sectionInfoArray = await Promise.all(
-      book.sections.map(async (section) => {
-        const doc = await section.createDocument();
-        return [section.id, getTextFromHTML(doc.documentElement.outerHTML)];
-      })
+  // 使用 entries() 方法获取索引和元素
+  for (const [index, tocItem] of book.toc.entries()) {
+    iCTip(
+      "导入" + tocItem.label + "中 ..." + (index + 1) + "/" + book.toc.length
     );
-    console.log("sectionInfoArray", sectionInfoArray);
-    const sectionInfoMap = Object.fromEntries(sectionInfoArray);
-
-    const insertTocItem = async (item) => {
-      console.log("item", item);
-      let newTocItem = { ...item }; // 复制 item 的属性
-      if (sectionInfoMap[item.href]) {
-        newTocItem.html = sectionInfoMap[item.href];
-        try {
-          await new Promise((resolve, reject) => {
-            ipcRenderer.send("db-insert-chapter", {
-              label: newTocItem.label,
-              href: newTocItem.href,
-              content: newTocItem.html,
-              bookId: bookId,
-            });
-            // 监听插入响应
-            ipcRenderer.once("db-insert-chapter-response", (event, res) => {
-              if (res.success) {
-                console.log(res.id, item.href);
-                item.href = res.id;
-                resolve();
-              } else {
-                reject(new Error(`插入失败: ${res.message}`));
-              }
-            });
-          });
-        } catch (err) {
-          console.error("插入章节数据失败:", err);
-        }
-      }
-      if (item.subitems) {
-        for (const subitem of item.subitems) {
-          await insertTocItem(subitem);
-        }
-      }
-    };
-    // 串行处理每个 toc 项
-    for (const tocItem of book.toc) {
-      await insertTocItem(tocItem);
-    }
-  } catch (err) {
-    console.error("处理文件时出错:", err);
+    await insertTocItem(tocItem);
   }
 };
