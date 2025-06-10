@@ -48,7 +48,7 @@ const showContextMenu = (event, href) => {
     EventBus.emit("commonCtxMenu-show", event);
   }, 99);
 };
-//更新右边内容
+//更新右边内容 href为toc里面的href 实际为数据库中的id号
 const updateCurChapter = (href) => {
   console.log("updateCurChapter", href);
   //从数据库里面获取内容

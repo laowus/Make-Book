@@ -45,17 +45,18 @@ export const useBookStore = defineStore("bookStore", {
       this.toc = toc;
     },
     delTocByHref(href) {
+      console.log("delTocByHref", href);
       const removeItem = (items) => {
         for (let i = items.length - 1; i >= 0; i--) {
           const item = items[i];
           if (item.href === href) {
-            items.splice(i, 1); // 删除匹配项
-            EventBus.emit("deleteToc", href);
+            const preItem = items[i - 1];
+            items.splice(i, 1);
+            EventBus.emit("updateToc", preItem.href);
             return true;
           }
           if (item.subitems && item.subitems.length > 0) {
             if (removeItem(item.subitems)) {
-              EventBus.emit("deleteToc", href);
               return true;
             }
           }

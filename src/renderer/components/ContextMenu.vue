@@ -7,7 +7,7 @@ import { useBookStore } from "../store/bookStore";
 const { currentHref } = storeToRefs(useAppStore());
 const { setCtxMenuData, hideCtxMenu } = useAppStore();
 const { delTocByHref } = useBookStore();
-const { metaData } = storeToRefs(useBookStore());
+const { metaData, curChapter } = storeToRefs(useBookStore());
 
 const props = defineProps({
   posStyle: Object,
@@ -40,7 +40,7 @@ const MenuItems = {
     name: "新建下级章节",
     icon: "icon-xinjian",
     action: () => {
-      EventBus.emit("addChapter", currentHref.value);
+      EventBus.emit("addChapter", curChapter.value.id);
       hideCtxMenu();
     },
   },
@@ -48,9 +48,9 @@ const MenuItems = {
     name: "删除",
     icon: "icon-guanbi",
     action: () => {
-      console.log("delete", currentHref.value);
-      if (currentHref.value) {
-        delTocByHref(currentHref.value);
+      console.log("delete", curChapter.value.id);
+      if (curChapter.value.id) {
+        delTocByHref(curChapter.value.id);
       }
       hideCtxMenu();
     },
