@@ -5,7 +5,8 @@ import { useAppStore } from "../store/appStore";
 import { useBookStore } from "../store/bookStore";
 
 const { currentHref } = storeToRefs(useAppStore());
-const { setCtxMenuData, hideCtxMenu } = useAppStore();
+const { setCtxMenuData, hideCtxMenu, showEditView, hideEditView } =
+  useAppStore();
 const { delTocByHref } = useBookStore();
 const { metaData, curChapter } = storeToRefs(useBookStore());
 
@@ -24,7 +25,7 @@ const MenuItems = {
     icon: "icon-xinjian",
     action: () => {
       EventBus.emit("addChapter", {
-        herf: null,
+        href: null,
         chapter: {
           bookId: metaData?.value.bookId,
           label: "新章节",
@@ -40,7 +41,25 @@ const MenuItems = {
     name: "新建下级章节",
     icon: "icon-xinjian",
     action: () => {
-      EventBus.emit("addChapter", curChapter.value.id);
+      console.log("addSon", curChapter.value.id);
+      EventBus.emit("addChapter", {
+        href: curChapter.value.id,
+        chapter: {
+          bookId: metaData?.value.bookId,
+          label: "新章节",
+          href: `OPS/chapter-${Date.now()}`,
+          content: "这里输入内容(只为了提示你输入内容,删除修改为你要的内容)",
+        },
+      });
+      hideCtxMenu();
+    },
+  },
+  update: {
+    name: "修改",
+    icon: "icon-xiugai",
+    action: () => {
+      console.log("update", curChapter.value.label);
+      showEditView();
       hideCtxMenu();
     },
   },
@@ -66,6 +85,8 @@ EventBus.on("commonCtxMenu-init", (dataType) => {
         MenuItems.addTop,
         MenuItems.sp,
         MenuItems.addSon,
+        MenuItems.sp,
+        MenuItems.update,
         MenuItems.sp,
         MenuItems.delete,
       ];

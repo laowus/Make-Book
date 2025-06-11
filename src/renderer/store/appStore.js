@@ -11,6 +11,7 @@ export const useAppStore = defineStore("appStore", {
     // 通用弹窗
     tipShow: false,
     tipText: null,
+    editViewShow: false,
   }),
   getters: {},
   actions: {
@@ -22,6 +23,12 @@ export const useAppStore = defineStore("appStore", {
     },
     hideCtxMenu() {
       this.ctxMenuShow = false;
+    },
+    showEditView() {
+      this.editViewShow = true;
+    },
+    hideEditView() {
+      this.editViewShow = false;
     },
     setCtxMenuData(data) {
       this.ctxMenuData.length = 0;

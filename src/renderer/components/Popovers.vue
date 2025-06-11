@@ -5,17 +5,24 @@ import EventBus from "../common/EventBus";
 import { useAppStore } from "../store/appStore";
 import ContextMenu from "./ContextMenu.vue";
 import Tip from "./Tip.vue";
-const { ctxMenuShow, ctxMenuData, ctxMenuSeparatorNums, tipShow, tipText } =
-  storeToRefs(useAppStore());
+import EditView from "./EditView.vue";
+const {
+  ctxMenuShow,
+  ctxMenuData,
+  ctxMenuSeparatorNums,
+  tipShow,
+  tipText,
+} = storeToRefs(useAppStore());
 const { hideCtxMenu, showCtxMenu, showTip, hideTip } = useAppStore();
+
 const ctxMenuPosStyle = reactive({ left: -999, top: -999 });
 let ctxMenuPos = null;
 const getCtxMenuAutoHeight = () => {
   const total = ctxMenuData.value.length || 1;
   const spNums = ctxMenuSeparatorNums.value;
-  const itemHeight = 38,
-    padding = 15;
-  return itemHeight * (total - spNums) + 7.5 * spNums + 2 * padding;
+  const itemHeight = 25,
+    padding = 5;
+  return itemHeight * (total - spNums) + 2.5 * spNums + 2 * padding;
 };
 
 const menuWidth = 208;
@@ -64,6 +71,9 @@ EventBus.on("hideTip", () => {
 </script>
 <template>
   <div id="popovers">
+    <EditView>
+
+    </EditView>
     <ContextMenu
       v-show="ctxMenuShow"
       :posStyle="ctxMenuPosStyle"

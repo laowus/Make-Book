@@ -284,6 +284,13 @@ onMounted(() => {
   margin: 10px;
   font-size: 12px;
 }
+.btn-icon-row {
+  flex-direction: row;
+  border: 1px solid #87ceeb;
+  border-radius: 5px;
+  padding: 5px;
+  background-color: #add8e6;
+}
 
 .btn-icon .iconfont {
   font-size: 2rem;

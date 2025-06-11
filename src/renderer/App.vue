@@ -1,20 +1,23 @@
 <script setup>
-import { ref, provide, onMounted, watch } from "vue";
+import { ref, provide, onMounted, watch, toRaw } from "vue";
 import { storeToRefs } from "pinia";
 import { createTOCView } from "./libs/ui/tree.js";
 import EventBus from "./common/EventBus";
 import Popovers from "./components/Popovers.vue";
 import Header from "./components/Header.vue";
 import TxtEditor from "./components/TxtEditor.vue";
+import { useAppStore } from "./store/appStore";
 import { useBookStore } from "./store/bookStore";
+
 const { ipcRenderer } = window.require("electron");
 const { addTocByHref } = useBookStore();
 const { curChapter, metaData, toc } = storeToRefs(useBookStore());
+const { hideEditView, hideCtxMenu } = useAppStore();
 let tocView;
 
 //重新布局目录
 const updateTocView = (curhref) => {
-  console.log("重新布局目录updateTocView", toc.value);
+  console.log("重新布局目录updateTocView", toRaw(toc.value));
 
   tocView = null;
   tocView = createTOCView(
@@ -66,6 +69,13 @@ const updateCurChapter = (href) => {
 EventBus.on("updateToc", (href) => {
   console.log("EventBus.onupdateToc", href);
   updateTocView(href);
+});
+
+onMounted(() => {
+  document.addEventListener("click", (event) => {
+    hideCtxMenu();
+    hideEditView();
+  });
 });
 </script>
 

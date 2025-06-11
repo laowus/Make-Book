@@ -67,6 +67,7 @@ export const useBookStore = defineStore("bookStore", {
     },
     // 插入数据库中 并更新目录以及当前章节
     addTocByHref(href, tocItem) {
+      console.log("addTocByHref", href, tocItem);
       ipcRenderer.once("db-insert-chapter-response", (event, res) => {
         if (res.success) {
           const item = {
@@ -77,6 +78,7 @@ export const useBookStore = defineStore("bookStore", {
           if (href) {
             //获取要插入的父级元素
             const parentItem = this.findTocByHref(href);
+            console.log("findTocByHref", parentItem);
             if (parentItem.subitems) {
               parentItem.subitems.push(item);
             } else {
@@ -95,6 +97,9 @@ export const useBookStore = defineStore("bookStore", {
         }
       });
       ipcRenderer.send("db-insert-chapter", tocItem);
+    },
+    updateTocByHref(href, newItem) {
+      ipcRenderer.send("db-update-chapter", href, newItem);
     },
     findTocByHref(href) {
       const findItem = (href, items) => {
