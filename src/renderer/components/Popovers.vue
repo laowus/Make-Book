@@ -12,6 +12,7 @@ const {
   ctxMenuSeparatorNums,
   tipShow,
   tipText,
+  editViewShow,
 } = storeToRefs(useAppStore());
 const { hideCtxMenu, showCtxMenu, showTip, hideTip } = useAppStore();
 
@@ -71,9 +72,7 @@ EventBus.on("hideTip", () => {
 </script>
 <template>
   <div id="popovers">
-    <EditView>
-
-    </EditView>
+    <EditView> </EditView>
     <ContextMenu
       v-show="ctxMenuShow"
       :posStyle="ctxMenuPosStyle"

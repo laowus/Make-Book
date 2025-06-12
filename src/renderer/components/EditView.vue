@@ -1,20 +1,32 @@
 <script setup>
-import { ref, reactive } from "vue";
+const { ipcRenderer } = window.require("electron");
+import { ref, watch, reactive, onMounted, toRaw } from "vue";
 import { storeToRefs } from "pinia";
 import { useAppStore } from "../store/appStore";
 import { useBookStore } from "../store/bookStore";
 const { curChapter } = storeToRefs(useBookStore());
+const { updateTocByHref } = useBookStore();
 const { showEditView, hideEditView } = useAppStore();
 const { editViewShow } = storeToRefs(useAppStore());
+// 创建一个新的响应式变量
+const newLabel = ref(curChapter.value.label);
 const updateLabel = () => {
   console.log("updateChapter", curChapter.value);
+  //数据库修改 toc修改
+  curChapter.value.label = newLabel.value;
+  ipcRenderer.send("db-update-chapter", toRaw(curChapter.value));
+  updateTocByHref(curChapter.value);
+  hideEditView();
 };
+watch(curChapter, (newVal, oldVal) => {
+  newLabel.value = newVal.label;
+});
 </script>
 <template>
-  <el-dialog v-model="editViewShow" title="修改标题" width="500">
+  <el-dialog v-model="editViewShow" title="修改标题" width="400">
     <el-form>
       <el-form-item label="标题名">
-        <el-input v-model="curChapter.label" /> </el-form-item
+        <el-input v-model="newLabel" /> </el-form-item
     ></el-form>
     <template #footer>
       <div class="dialog-footer">
@@ -24,40 +36,4 @@ const updateLabel = () => {
     </template>
   </el-dialog>
 </template>
-<style>
-.editChapter {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 203;
-}
-.edit-musk {
-  position: absolute;
-  margin: auto;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0px 0px 6px #666;
-}
-
-.edit-dilog {
-  width: 265px;
-  height: 150px;
-  gap: 10px;
-  background: #ccc;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.btns {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-</style>
+<style></style>

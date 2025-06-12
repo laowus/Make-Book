@@ -27,7 +27,8 @@ const dbHandle = () => {
   });
 
   ipcMain.on("db-update-chapter", (event, chapter) => {
-    updateChapter(chapter.bookId, chapter.href, chapter.content, event);
+    console.log("db-update-chapter", chapter);
+    updateChapter(chapter, event);
   });
 };
 

@@ -58,7 +58,7 @@ const MenuItems = {
     name: "修改",
     icon: "icon-xiugai",
     action: () => {
-      console.log("update", curChapter.value.label);
+      console.log("Context - Menu - update", curChapter.value.label);
       showEditView();
       hideCtxMenu();
     },

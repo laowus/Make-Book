@@ -98,8 +98,14 @@ export const useBookStore = defineStore("bookStore", {
       });
       ipcRenderer.send("db-insert-chapter", tocItem);
     },
-    updateTocByHref(href, newItem) {
-      ipcRenderer.send("db-update-chapter", href, newItem);
+    updateTocByHref(newItem) {
+      const tocItem = this.findTocByHref(newItem.id);
+      console.log("updateTocByHref", tocItem, newItem);
+      if (tocItem) {
+        tocItem.label = newItem.label;
+        console.log("更新后toc", this.toc);
+        EventBus.emit("updateToc", tocItem.href);
+      }
     },
     findTocByHref(href) {
       const findItem = (href, items) => {

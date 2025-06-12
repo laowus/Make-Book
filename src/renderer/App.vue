@@ -18,7 +18,6 @@ let tocView;
 //重新布局目录
 const updateTocView = (curhref) => {
   console.log("重新布局目录updateTocView", toRaw(toc.value));
-
   tocView = null;
   tocView = createTOCView(
     toc.value,
@@ -73,15 +72,18 @@ EventBus.on("updateToc", (href) => {
 
 onMounted(() => {
   document.addEventListener("click", (event) => {
-    hideCtxMenu();
-    hideEditView();
+    // 若点击源不是 Popovers 组件，隐藏菜单和编辑视图
+    if (!event.target.closest("#popovers")) {
+      hideCtxMenu();
+      hideEditView();
+    }
   });
 });
 </script>
 
 <template>
   <div class="container">
-    <Popovers></Popovers>
+    <Popovers @click.stop></Popovers>
     <Header></Header>
     <div class="content">
       <div id="leftMenu">

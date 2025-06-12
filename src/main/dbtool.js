@@ -191,16 +191,16 @@ const getChapter = (bookId, href, event) => {
   );
 };
 
-const updateChapter = (bookId, href, content, event) => {
+const updateChapter = (chapter, event) => {
   db.run(
-    `UPDATE ee_chapter SET content = ?, updateTime = datetime('now') WHERE bookId = ? AND href = ?`,
-    [content, bookId, href],
+    `UPDATE ee_chapter SET content = ?,label =?, updateTime = datetime('now') WHERE bookId = ? AND href = ?`,
+    [chapter.content, chapter.label, chapter.bookId, chapter.href],
     (err) => {
       if (err) {
         event.returnValue = { success: false };
       } else {
-        console.log("Rows affected:", this.changes);
         event.returnValue = { success: true, data: this.lastID };
+        console.log("Rows affected:", chapter.label);
       }
     }
   );
