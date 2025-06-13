@@ -36,7 +36,6 @@ const MenuItems = {
       hideCtxMenu();
     },
   },
-
   addSon: {
     name: "新建下级章节",
     icon: "icon-xinjian",
@@ -74,6 +73,22 @@ const MenuItems = {
       hideCtxMenu();
     },
   },
+  up: {
+    name: "上移",
+    icon: "icon-shang",
+    action: () => {
+      console.log("up", curChapter.value.id);
+      hideCtxMenu();
+    },
+  },
+  down: {
+    name: "下移",
+    icon: "icon-xia",
+    action: () => {
+      console.log("down", curChapter.value.id);
+      hideCtxMenu();
+    } 
+  }
 };
 
 EventBus.on("commonCtxMenu-init", (dataType) => {
