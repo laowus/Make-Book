@@ -12,6 +12,7 @@ export const useAppStore = defineStore("appStore", {
     tipShow: false,
     tipText: null,
     editViewShow: false,
+    historyViewShow: false,
   }),
   getters: {},
   actions: {
@@ -30,6 +31,13 @@ export const useAppStore = defineStore("appStore", {
     hideEditView() {
       this.editViewShow = false;
     },
+    showHistoryView() {
+      this.historyViewShow = true;
+    },
+    hideHistoryView() {
+      this.historyViewShow = false;
+    },
+
     setCtxMenuData(data) {
       this.ctxMenuData.length = 0;
       if (data) {

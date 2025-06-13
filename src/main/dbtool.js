@@ -75,6 +75,7 @@ const createTable = () => {
             description TEXT,
             cover TEXT,
             path TEXT,
+            toc TEXT,
             createTime TEXT,
             updateTime TEXT )
     `,
@@ -106,8 +107,7 @@ const createTable = () => {
 
 const insertBook = (book, event) => {
   db.run(
-    `
-    INSERT INTO ee_book (title, author, description, cover, path, createTime, updateTime)
+    ` INSERT INTO ee_book (title, author, description, cover, path, createTime, updateTime)
      VALUES (? , ?, ?, ?, ?, datetime('now'), datetime('now'))`,
     [book.title, book.author, book.description, book.cover, book.path],
     function (err) {
@@ -122,6 +122,19 @@ const insertBook = (book, event) => {
       }
     }
   );
+};
+
+const getBooks = (event) => {
+  console.log("Starting getBooks query");
+  db.all(`SELECT * FROM ee_book`, (err, rows) => {
+    if (err) {
+      console.error("Error in getBooks query:", err.message);
+      event.returnValue = { success: false, error: err.message };
+    } else {
+      console.log("getBooks query result:", rows);
+      event.returnValue = { success: true, data: rows };
+    }
+  });
 };
 
 const insertChapter = (chapter, event) => {
@@ -206,12 +219,30 @@ const updateChapter = (chapter, event) => {
   );
 };
 
+const updateToc = (book, event) => {
+  db.run(
+    `UPDATE ee_book SET toc =?, updateTime = datetime('now') WHERE id = ?`,
+    [book.toc, book.id],
+    (err) => {
+      if (err) {
+        event.returnValue = { success: false };
+      } else {
+        event.returnValue = { success: true, data: this.lastID };
+        console.log("Rows affected:", book.toc);
+      }
+    }
+  );
+};
+
 //导出
 module.exports = {
   initDatabase,
   insertBook,
+  getBooks,
+  getChapters,
   insertChapter,
   getFirstChapter,
   getChapter,
   updateChapter,
+  updateToc,
 };

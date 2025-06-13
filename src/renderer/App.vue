@@ -18,6 +18,11 @@ let tocView;
 //重新布局目录
 const updateTocView = (curhref) => {
   console.log("重新布局目录updateTocView", toRaw(toc.value));
+  const _book = {
+    id: metaData.value.bookId,
+    toc: toRaw(toc.value),
+  };
+  ipcRenderer.sendSync("db-update-toc", _book);
   tocView = null;
   tocView = createTOCView(
     toc.value,

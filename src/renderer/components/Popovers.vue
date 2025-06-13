@@ -6,6 +6,8 @@ import { useAppStore } from "../store/appStore";
 import ContextMenu from "./ContextMenu.vue";
 import Tip from "./Tip.vue";
 import EditView from "./EditView.vue";
+import HistoryView from "./HistoryView.vue";
+
 const {
   ctxMenuShow,
   ctxMenuData,
@@ -72,6 +74,7 @@ EventBus.on("hideTip", () => {
 </script>
 <template>
   <div id="popovers">
+    <HistoryView> </HistoryView>
     <EditView> </EditView>
     <ContextMenu
       v-show="ctxMenuShow"

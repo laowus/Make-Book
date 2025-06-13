@@ -8,8 +8,10 @@ const { ipcRenderer } = window.require("electron");
 import { open } from "../libs/parseBook.js";
 import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
 import { useBookStore } from "../store/bookStore";
+import { useAppStore } from "../store/appStore";
 const { curChapter, metaData, toc, isFirst } = storeToRefs(useBookStore());
 const { addTocByHref, setMetaData, setToc, setFirst } = useBookStore();
+const { showHistoryView } = useAppStore();
 
 const curIndex = ref(0);
 const indentNum = ref(2);
@@ -136,6 +138,10 @@ onMounted(() => {
           <button class="btn-icon" id="add-file-btn">
             <span class="iconfont icon-Epub" style="color: green"></span>
             <span>导入文件</span>
+          </button>
+          <button class="btn-icon" @click="showHistoryView">
+            <span class="iconfont icon-lishijilu" style="color: green"></span>
+            <span>历史记录</span>
           </button>
         </div>
         <div v-show="curIndex === 1">
