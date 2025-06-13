@@ -222,7 +222,7 @@ const updateChapter = (chapter, event) => {
 const updateToc = (book, event) => {
   db.run(
     `UPDATE ee_book SET toc =?, updateTime = datetime('now') WHERE id = ?`,
-    [book.toc, book.id],
+    [JSON.stringify(book.toc), book.id],
     (err) => {
       if (err) {
         event.returnValue = { success: false };

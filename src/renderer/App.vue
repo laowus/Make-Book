@@ -1,5 +1,5 @@
 <script setup>
-import { ref, provide, onMounted, watch, toRaw } from "vue";
+import { onMounted, toRaw } from "vue";
 import { storeToRefs } from "pinia";
 import { createTOCView } from "./libs/ui/tree.js";
 import EventBus from "./common/EventBus";
@@ -22,6 +22,7 @@ const updateTocView = (curhref) => {
     id: metaData.value.bookId,
     toc: toRaw(toc.value),
   };
+  //保存当前toc到数据库中
   ipcRenderer.sendSync("db-update-toc", _book);
   tocView = null;
   tocView = createTOCView(

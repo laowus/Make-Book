@@ -1,26 +1,6 @@
 import { defineStore } from "pinia";
 import EventBus from "../common/EventBus";
 const { ipcRenderer } = window.require("electron");
-/**
-[
-    {
-        label: "封面",
-        href: "OPS/coverpage.html",
-        subitems: [
-            {
-              label: "第一章　血洗孤城",
-              href: "OPS/chapter276.html",
-              subitems: null,
-            },
-            {
-              label: "第二章　妙计巧连环",
-              href: "OPS/chapter277.html",
-              subitems: null,
-            }
-        ],
-    }
-]
-**/
 export const useBookStore = defineStore("bookStore", {
   state: () => ({
     isFirst: true,
@@ -125,7 +105,6 @@ export const useBookStore = defineStore("bookStore", {
       return findItem(href, this.toc);
     },
   },
-  // ,
   // persist: {
   //   enabled: true,
   //   strategies: [
