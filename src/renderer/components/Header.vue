@@ -13,7 +13,7 @@ const { curChapter, metaData, toc, isFirst } = storeToRefs(useBookStore());
 const { addTocByHref, setMetaData, setToc, setFirst } = useBookStore();
 const { showHistoryView } = useAppStore();
 
-const curIndex = ref(0);
+const curIndex = ref(1);
 const indentNum = ref(2);
 const changeTab = (index) => {
   curIndex.value = index;
@@ -94,14 +94,14 @@ onMounted(() => {
           @click="changeTab(0)"
           :class="{ active: curIndex === 0 }"
         >
-          导入
+          开始
         </div>
         <div
           class="tabname"
           @click="changeTab(1)"
           :class="{ active: curIndex === 1 }"
         >
-          章节
+          导入
         </div>
         <div
           class="tabname"
@@ -129,6 +129,12 @@ onMounted(() => {
       </div>
       <div class="tabcontent">
         <div v-show="curIndex === 0">
+          <button class="btn-icon">
+            <span class="iconfont icon-xinjian" style="color: green"></span>
+            <span>新建</span>
+          </button>
+        </div>
+        <div v-show="curIndex === 1">
           <input
             type="file"
             id="add-file"
@@ -142,16 +148,6 @@ onMounted(() => {
           <button class="btn-icon" @click="showHistoryView">
             <span class="iconfont icon-lishijilu" style="color: green"></span>
             <span>历史记录</span>
-          </button>
-        </div>
-        <div v-show="curIndex === 1">
-          <button class="btn-icon" disabled>
-            <span class="iconfont icon-xinjian" style="color: green"></span>
-            <span>新建章节</span>
-          </button>
-          <button class="btn-icon" disabled>
-            <span class="iconfont icon-jiaru" style="color: green"></span>
-            <span>插入章节</span>
           </button>
         </div>
         <div v-show="curIndex === 2">
