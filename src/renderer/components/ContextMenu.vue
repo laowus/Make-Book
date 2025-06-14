@@ -7,7 +7,7 @@ import { useBookStore } from "../store/bookStore";
 const { currentHref } = storeToRefs(useAppStore());
 const { setCtxMenuData, hideCtxMenu, showEditView, hideEditView } =
   useAppStore();
-const { delTocByHref } = useBookStore();
+const { delTocByHref, upperToc, lowerToc, upToc, downToc } = useBookStore();
 const { metaData, curChapter } = storeToRefs(useBookStore());
 
 const props = defineProps({
@@ -75,20 +75,36 @@ const MenuItems = {
   },
   up: {
     name: "上移",
-    icon: "icon-shang",
+    icon: "icon-shangyi",
     action: () => {
-      console.log("up", curChapter.value.id);
+      upToc(curChapter.value.id);
       hideCtxMenu();
     },
   },
   down: {
     name: "下移",
-    icon: "icon-xia",
+    icon: "icon-xiayi",
     action: () => {
-      console.log("down", curChapter.value.id);
+      downToc(curChapter.value.id);
       hideCtxMenu();
-    } 
-  }
+    },
+  },
+  upper: {
+    name: "上一级",
+    icon: "icon-shangyiji",
+    action: () => {
+      upperToc(curChapter.value.id);
+      hideCtxMenu();
+    },
+  },
+  lower: {
+    name: "下一级",
+    icon: "icon-xiayiji",
+    action: () => {
+      lowerToc(curChapter.value.id);
+      hideCtxMenu();
+    },
+  },
 };
 
 EventBus.on("commonCtxMenu-init", (dataType) => {
@@ -100,6 +116,14 @@ EventBus.on("commonCtxMenu-init", (dataType) => {
         MenuItems.addTop,
         MenuItems.sp,
         MenuItems.addSon,
+        MenuItems.sp,
+        MenuItems.up,
+        MenuItems.sp,
+        MenuItems.down,
+        MenuItems.sp,
+        MenuItems.upper,
+        MenuItems.sp,
+        MenuItems.lower,
         MenuItems.sp,
         MenuItems.update,
         MenuItems.sp,

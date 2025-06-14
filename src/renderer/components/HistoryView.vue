@@ -1,9 +1,12 @@
 <script setup>
 import { ref, watch, reactive, onMounted } from "vue";
-import { useAppStore } from "../store/appStore";
 import { storeToRefs } from "pinia";
+import EventBus from "../common/EventBus";
+import { useAppStore } from "../store/appStore";
+import { useBookStore } from "../store/bookStore";
 const { historyViewShow } = storeToRefs(useAppStore());
 const { hideHistoryView } = useAppStore();
+const { setMetaData, setToc } = useBookStore();
 const { ipcRenderer } = window.require("electron");
 const books = ref([]);
 // 定义获取书籍数据的函数
@@ -25,7 +28,24 @@ watch(historyViewShow, (newValue) => {
 });
 const importBook = (index, row) => {
   console.log(index, row);
-  // hideHistoryView();
+  const metaData = {
+    bookId: row.id,
+    title: row.title,
+    author: row.author,
+    description: row.description,
+    cover: row.cover,
+  };
+  setMetaData(metaData);
+  const toc = JSON.parse(row.toc);
+  setToc(toc);
+  console.log("importBook", metaData, toc);
+  const firstChapter = ipcRenderer.sendSync(
+    "db-first-chapter",
+    metaData.bookId
+  );
+  console.log("const open firstChapter", firstChapter.data);
+  EventBus.emit("updateToc", firstChapter.data.id);
+  hideHistoryView();
 };
 </script>
 <template>

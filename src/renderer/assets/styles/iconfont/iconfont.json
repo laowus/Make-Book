@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1463371",
+      "name": "上一级",
+      "font_class": "shangyiji",
+      "unicode": "e691",
+      "unicode_decimal": 59025
+    },
+    {
+      "icon_id": "19783073",
+      "name": "下一级",
+      "font_class": "xiayiji",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "826149",
+      "name": "上移",
+      "font_class": "shangyi",
+      "unicode": "e62b",
+      "unicode_decimal": 58923
+    },
+    {
+      "icon_id": "826164",
+      "name": "下移",
+      "font_class": "xiayi",
+      "unicode": "e639",
+      "unicode_decimal": 58937
+    },
+    {
       "icon_id": "1305475",
       "name": "历史记录",
       "font_class": "lishijilu",
