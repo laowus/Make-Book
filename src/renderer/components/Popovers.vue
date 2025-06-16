@@ -7,15 +7,10 @@ import ContextMenu from "./ContextMenu.vue";
 import Tip from "./Tip.vue";
 import EditView from "./EditView.vue";
 import HistoryView from "./HistoryView.vue";
+import NewBook from "./NewBook.vue";
 
-const {
-  ctxMenuShow,
-  ctxMenuData,
-  ctxMenuSeparatorNums,
-  tipShow,
-  tipText,
-  editViewShow,
-} = storeToRefs(useAppStore());
+const { ctxMenuShow, ctxMenuData, ctxMenuSeparatorNums, tipShow, tipText } =
+  storeToRefs(useAppStore());
 const { hideCtxMenu, showCtxMenu, showTip, hideTip } = useAppStore();
 
 const ctxMenuPosStyle = reactive({ left: -999, top: -999 });
@@ -76,6 +71,7 @@ EventBus.on("hideTip", () => {
   <div id="popovers">
     <HistoryView> </HistoryView>
     <EditView> </EditView>
+    <NewBook> </NewBook>
     <ContextMenu
       v-show="ctxMenuShow"
       :posStyle="ctxMenuPosStyle"

@@ -59,6 +59,7 @@ export const open = async (file) => {
     console.log("file", file);
     const timestamp = Date.now();
     const book = await makeBook(file);
+    console.log(isFirst.value);
     if (isFirst.value) {
       console.log("book", book);
       const coverDir = ipcRenderer.sendSync("get-cover-dir", "ping");

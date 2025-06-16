@@ -74,7 +74,6 @@ const createTable = () => {
             author TEXT,
             description TEXT,
             cover TEXT,
-            path TEXT,
             toc TEXT,
             createTime TEXT,
             updateTime TEXT )
@@ -107,9 +106,9 @@ const createTable = () => {
 
 const insertBook = (book, event) => {
   db.run(
-    ` INSERT INTO ee_book (title, author, description, cover, path, createTime, updateTime)
-     VALUES (? , ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-    [book.title, book.author, book.description, book.cover, book.path],
+    ` INSERT INTO ee_book (title, author, description, cover,  createTime, updateTime)
+     VALUES (? , ?, ?, ?,  datetime('now'), datetime('now'))`,
+    [book.title, book.author, book.description, book.cover],
     function (err) {
       if (err) {
         console.error(err.message);

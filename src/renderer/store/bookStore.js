@@ -26,6 +26,9 @@ export const useBookStore = defineStore(
       setToc(toc) {
         this.toc = toc;
       },
+      clearToc() {
+        this.toc = null;
+      },
       delTocByHref(href) {
         console.log("delTocByHref", href);
         const removeItem = (items) => {

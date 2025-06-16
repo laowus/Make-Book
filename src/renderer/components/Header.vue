@@ -4,14 +4,15 @@ import { storeToRefs } from "pinia";
 import { ElMessage } from "element-plus";
 import EventBus from "../common/EventBus";
 import WindowCtr from "./WindowCtr.vue";
-const { ipcRenderer } = window.require("electron");
 import { open } from "../libs/parseBook.js";
 import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
 import { useBookStore } from "../store/bookStore";
 import { useAppStore } from "../store/appStore";
-const { curChapter, metaData, toc, isFirst } = storeToRefs(useBookStore());
-const { addTocByHref, setMetaData, setToc, setFirst } = useBookStore();
-const { showHistoryView } = useAppStore();
+
+const { ipcRenderer } = window.require("electron");
+const { metaData, isFirst } = storeToRefs(useBookStore());
+const { setMetaData, setFirst } = useBookStore();
+const { showHistoryView, showNewBook } = useAppStore();
 
 const curIndex = ref(1);
 const indentNum = ref(2);
@@ -65,7 +66,6 @@ const initDom = () => {
               label: file.name.split(".")[0],
               href: `OPS/chapter-${Date.now()}`,
               content: fileStr,
-              isHand: true,
             };
             EventBus.emit("addChapter", { href: null, chapter: chapter });
           }
@@ -129,7 +129,7 @@ onMounted(() => {
       </div>
       <div class="tabcontent">
         <div v-show="curIndex === 0">
-          <button class="btn-icon">
+          <button class="btn-icon" @click="showNewBook">
             <span class="iconfont icon-xinjian" style="color: green"></span>
             <span>新建</span>
           </button>
