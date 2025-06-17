@@ -13,9 +13,9 @@ pinia保存操作的内容
 
 ```
 [
-label:"第一章",
-href:'#chapterId???',   //href="chapterid?"
-subitems: null
+  label:"第一章",
+  href:'#chapterId???',   //href="chapterid?"
+  subitems: null
 ]
 toc 插入时候改变 href="chapterid?"
 ```
