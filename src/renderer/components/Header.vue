@@ -4,13 +4,14 @@ import { storeToRefs } from "pinia";
 import { ElMessage } from "element-plus";
 import EventBus from "../common/EventBus";
 import WindowCtr from "./WindowCtr.vue";
+import { getChapters } from "../utils/funs.js";
 import { open } from "../libs/parseBook.js";
 import { parseFile, readTxtFile, getTextFromHTML } from "../common/utils";
 import { useBookStore } from "../store/bookStore";
 import { useAppStore } from "../store/appStore";
 
 const { ipcRenderer } = window.require("electron");
-const { metaData, isFirst } = storeToRefs(useBookStore());
+const { curChapter, metaData, isFirst } = storeToRefs(useBookStore());
 const { setMetaData, setFirst } = useBookStore();
 const { showHistoryView, showNewBook } = useAppStore();
 
@@ -84,6 +85,57 @@ const initDom = () => {
 onMounted(() => {
   initDom();
 });
+//删除空行
+const deleteEmptyLines = () => {
+  if (curChapter.value.content) {
+    // 按换行符分割字符串
+    const lines = curChapter.value.content.split("\n");
+    // 过滤掉空行
+    const nonEmptyLines = lines.filter((line) => line.trim() !== "");
+    // 重新拼接字符串
+    curChapter.value.content = nonEmptyLines.join("\n");
+  }
+};
+// 缩进
+const indentFirstLine = () => {
+  if (curChapter.value.content) {
+    const indentString = "    ".repeat(indentNum.value);
+    console.log("空格", indentString, "空格");
+    // 按换行符分割字符串
+    const lines = curChapter.value.content
+      .split("\n")
+      .map((line) => line.trimStart());
+    // 给每一行添加缩进
+    const indentedLines = lines.map((line) => indentString + line);
+    // 重新拼接字符串
+    curChapter.value.content = indentedLines.join("\n");
+  }
+};
+
+const regString = () => {
+  const pre = $("#pre").value;
+  const aft = $("#aft").value;
+  let attach = $("#attach").value.trim();
+  attach ? (attach = `|^\s*(${attach})`) : (attach = "");
+  // 动态拼接正则表达式
+  const regexPattern = `^\\s*([${pre}][一二三四五六七八九十0-9]+[${aft}]).*${attach}([^\\n]+)?$`;
+  const chapterRegex = new RegExp(regexPattern, "gm");
+  console.log(chapterRegex);
+
+  // 分割字符串
+  const chapters = getChapters(
+    curChapter.value.content,
+    curChapter.value.title,
+    chapterRegex
+  );
+  console.log(chapters);
+  // 
+
+  // // chapters.value = chapters;
+  // curChapter.value = chapters.value[0];
+};
+
+
 </script>
 <template>
   <div class="header">

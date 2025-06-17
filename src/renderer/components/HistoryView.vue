@@ -6,7 +6,7 @@ import { useAppStore } from "../store/appStore";
 import { useBookStore } from "../store/bookStore";
 const { historyViewShow } = storeToRefs(useAppStore());
 const { hideHistoryView } = useAppStore();
-const { setMetaData, setToc } = useBookStore();
+const { setMetaData, setToc, setFirst } = useBookStore();
 const { ipcRenderer } = window.require("electron");
 const books = ref([]);
 // 定义获取书籍数据的函数
@@ -38,6 +38,7 @@ const importBook = (index, row) => {
   setMetaData(metaData);
   const toc = JSON.parse(row.toc);
   setToc(toc);
+  setFirst(false);
   console.log("importBook", metaData, toc);
   const firstChapter = ipcRenderer.sendSync(
     "db-first-chapter",
